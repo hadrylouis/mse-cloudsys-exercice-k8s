@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: todo
+    component: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      containers:
+      - name: frontend
+        image: icclabcna/ccp2-k8s-todo-frontend
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 10m
+        env:
+        - name: API_ENDPOINT_URL
+          value: http://api-svc:8081
+        - name: API_ENDPOINT
+          value: api-svc
+        - name: API_PWD
+          value: ccp2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    component: frontend
+  name: frontend-svc
+spec:
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+    name: frontend
+  selector:
+    app: front
+  type: LoadBalancer
